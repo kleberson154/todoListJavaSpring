@@ -1,5 +1,6 @@
 package com.kleberson.todolist.user;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,11 @@ public class UserController {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already exists");
         }
+
+        String password = BCrypt.withDefaults().hashToString(12, userModel.getPassword().toCharArray());
+
+        userModel.setPassword(password);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userRepository.save(userModel));
     }
 }
