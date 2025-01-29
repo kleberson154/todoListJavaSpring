@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,11 +46,20 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public TaskModel update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
+    public ResponseEntity update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
         TaskModel task = this.taskRepository.findById(id).orElse(null);
+        UUID idUser = (UUID) request.getAttribute("userId");
+
+        if (task == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task not found");
+        }
+
+        if (!task.getUserId().equals(idUser)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User does not have permission to change this task");
+        }
 
         Utils.copyNonNullProperties(taskModel, task);
 
-        return this.taskRepository.save(task);
+        return ResponseEntity.ok().body(this.taskRepository.save(task));
     }
 }
