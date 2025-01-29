@@ -1,5 +1,6 @@
 package com.kleberson.todolist.task;
 
+import com.kleberson.todolist.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
 
-    @PostMapping("/")
+    @PostMapping("/create")
     public ResponseEntity create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
         taskModel.setUserId((UUID) request.getAttribute("userId"));
         LocalDateTime date = LocalDateTime.now();
@@ -31,7 +32,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.OK).body(this.taskRepository.save(taskModel));
     }
 
-    @GetMapping("/")
+    @GetMapping("/list")
     public List<TaskModel> list (HttpServletRequest request){
         try {
             UUID idUser = (UUID) request.getAttribute("userId");
@@ -43,5 +44,14 @@ public class TaskController {
             e.printStackTrace();
             throw new RuntimeException("Erro ao obter a lista de tarefas", e);
         }
+    }
+
+    @PutMapping("/{id}")
+    public TaskModel update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
+        TaskModel task = this.taskRepository.findById(id).orElse(null);
+
+        Utils.copyNonNullProperties(taskModel, task);
+
+        return this.taskRepository.save(task);
     }
 }
