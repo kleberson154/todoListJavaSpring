@@ -1,4 +1,3 @@
-LABEL authors="kleberson"
 FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
